@@ -24,9 +24,9 @@ func main() {
         fmt.Println(err)
         os.Exit(1)
     }
-    fmt.Println(v) // 1
+    fmt.Println(v) // 5
 
     obj.Next()
-    fmt.Println(obj.Value()) // 5
+    fmt.Println(obj.Value()) // 10
 }
 ```
