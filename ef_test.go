@@ -1,6 +1,8 @@
 package ef
 
 import (
+	"math"
+	"strconv"
 	"testing"
 )
 
@@ -117,5 +119,29 @@ func TestGeneric(t *testing.T) {
 	if obj.Value() != 5 {
 		t.Errorf("%d is not %d. Missing value", obj.Value(), 5)
 	}
+}
 
+func TestMSB(t *testing.T) {
+	tests := []struct {
+		x    uint64
+		want uint64
+	}{
+		{x: 0, want: 0},
+		{x: 1, want: 0},
+		{x: 2, want: 1},
+		{x: 3, want: 1},
+		{x: 4, want: 2},
+		{x: 8, want: 3},
+		{x: 12345, want: 13},
+		{x: 1 << 32, want: 32},
+		{x: math.MaxUint64 - 1, want: 63},
+		{x: math.MaxUint64, want: 63},
+	}
+	for _, tt := range tests {
+		t.Run(strconv.FormatUint(tt.x, 10), func(t *testing.T) {
+			if got := msb(tt.x); got != tt.want {
+				t.Errorf("msb() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

@@ -3,7 +3,7 @@ package ef
 import (
 	"errors"
 	"log"
-	"math"
+	"math/bits"
 
 	"github.com/bits-and-blooms/bitset"
 )
@@ -43,7 +43,7 @@ func New(universe uint64, n uint64) *EliasFano {
 	higherBitsLength := n + (universe >> lowerBits) + 2
 	mask := (uint64(1) << lowerBits) - 1
 	lowerBitsOffset := higherBitsLength
-	bvLen := lowerBitsOffset + n*uint64(lowerBits)
+	bvLen := lowerBitsOffset + n*lowerBits
 	b := bitset.New(uint(bvLen))
 	return &EliasFano{universe, n, lowerBits, higherBitsLength, mask, lowerBitsOffset, bvLen, b, 0, 0, 0}
 }
@@ -75,7 +75,7 @@ func (ef *EliasFano) Compress(elems []uint64) {
 // Move the internal iterator to the given position and returns a value or an error.
 func (ef *EliasFano) Move(position uint64) (uint64, error) {
 	if position >= ef.Size() {
-		return 0, errors.New("Out of bound")
+		return 0, errors.New("out of bound")
 	}
 	if ef.position == position {
 		return ef.Value(), nil
@@ -98,11 +98,10 @@ func (ef *EliasFano) Move(position uint64) (uint64, error) {
 func (ef *EliasFano) Next() (uint64, error) {
 	ef.position++
 	if ef.position >= ef.Size() {
-		return 0, errors.New("End reached")
+		return 0, errors.New("end reached")
 	}
 	ef.readCurrentValue()
 	return ef.Value(), nil
-
 }
 
 // Position return the current position of the internal iterator.
@@ -142,7 +141,6 @@ func setBits(b *bitset.BitSet, offset uint64, bits uint64, length uint64) {
 		val := bits & (1 << (length - i - 1))
 		b.SetTo(uint(offset+i+1), val > 0)
 	}
-
 }
 
 func (ef *EliasFano) readCurrentValue() {
@@ -161,16 +159,9 @@ func (ef *EliasFano) readCurrentValue() {
 		low = low << 1
 	}
 	low = low >> 1
-	ef.curValue = uint64(((ef.highBitsPos - ef.position - 1) << ef.lowerBits) | low)
-}
-
-func round(a float64) int64 {
-	if a < 0 {
-		return int64(a - 0.5)
-	}
-	return int64(a + 0.5)
+	ef.curValue = ((ef.highBitsPos - ef.position - 1) << ef.lowerBits) | low
 }
 
 func msb(x uint64) uint64 {
-	return uint64(round(math.Log2(float64(x))))
+	return uint64(bits.Len64(x|1) - 1)
 }
