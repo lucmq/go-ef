@@ -2,9 +2,10 @@ package ef
 
 import (
 	"errors"
-	"github.com/willf/bitset"
 	"log"
 	"math"
+
+	"github.com/bits-and-blooms/bitset"
 )
 
 const (
